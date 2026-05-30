@@ -2,10 +2,6 @@ from langchain_ollama import (
     OllamaEmbeddings
 )
 
-from config import (
-    EMBED_MODEL
-)
-
 
 class EmbeddingModel:
 
@@ -13,5 +9,5 @@ class EmbeddingModel:
     def load():
 
         return OllamaEmbeddings(
-            model=EMBED_MODEL
+            model="nomic-embed-text"
         )

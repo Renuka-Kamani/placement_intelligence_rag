@@ -6,6 +6,6 @@ class Retriever:
         return db.as_retriever(
             search_type="similarity",
             search_kwargs={
-                "k": 2
+                "k": 3
             }
         )

@@ -9,5 +9,7 @@ class OllamaClient:
     def load():
 
         return OllamaLLM(
-            model="tinyllama"
+            model="gemma:2b",
+            temperature=0.1,
+            num_ctx=2048
         )

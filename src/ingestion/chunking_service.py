@@ -1,41 +1,50 @@
-from langchain.text_splitter import (
-    RecursiveCharacterTextSplitter
-)
-
-
 class ChunkingService:
 
     @staticmethod
     def split_text(text):
 
-        splitter = (
-            RecursiveCharacterTextSplitter(
-                chunk_size=250,
-                chunk_overlap=50,
-                separators=[
-                    "\n\n",
-                    "\n",
-                    ". ",
-                    " "
-                ]
-            )
+        chunks = []
+
+        lines = (
+            text.split("\n")
         )
 
-        chunks = (
-            splitter.split_text(
-                text
+        bad_keywords = [
+
+            "Easy Direct table lookup",
+            "Hard Conflict",
+            "Hop Type",
+            "RAG Challenge",
+            "Judges will use",
+            "Question Difficulty",
+            "Full synthesis",
+            "Expert"
+
+        ]
+
+        for line in lines:
+
+            line = line.strip()
+
+            if len(line) < 30:
+                continue
+
+            skip = False
+
+            for keyword in (
+                bad_keywords
+            ):
+
+                if keyword in line:
+
+                    skip = True
+                    break
+
+            if skip:
+                continue
+
+            chunks.append(
+                line
             )
-        )
 
-        # Remove very large chunks
-        filtered_chunks = []
-
-        for chunk in chunks:
-
-            if len(chunk) < 800:
-
-                filtered_chunks.append(
-                    chunk
-                )
-
-        return filtered_chunks
+        return chunks

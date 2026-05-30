@@ -7,21 +7,22 @@ class PromptBuilder:
     ):
 
         return f"""
-You are a Placement Intelligence Assistant.
+You are a strict extraction system.
 
-STRICT RULES:
-1. Answer ONLY using the retrieved context.
-2. Give exact values if present.
-3. If rounds exist, list them clearly.
-4. Never hallucinate.
-5. If answer is missing say:
+RULES:
+- ONLY answer from context
+- NEVER explain
+- NEVER guess
+- Return exact values
+- Keep answer under one sentence
+- If missing:
 "I don't have enough information in the document."
 
-Context:
+CONTEXT:
 {context}
 
-Question:
+QUESTION:
 {question}
 
-Answer:
+ANSWER:
 """
