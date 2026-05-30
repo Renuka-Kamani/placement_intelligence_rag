@@ -1,76 +1,161 @@
-# Placement Intelligence RAG System
+# Placement Intelligence Hybrid RAG System
 
-**An Enterprise-Grade Retrieval-Augmented Generation (RAG) System for Placement Intelligence using Local LLMs, Persistent ChromaDB, and Modular Software Engineering Practices**
-
----
-
-## Overview
-
-Placement Intelligence RAG System is an advanced Retrieval-Augmented Generation (RAG) application designed to answer placement-related queries using structured and unstructured placement datasets.
-
-The system processes:
-
-* Company eligibility profiles
-* Interview experiences
-* Placement statistics
-* Hiring distribution data
-* Multi-hop reasoning scenarios
-* Temporal placement trends
-* Conflicting records detection
-
-Unlike traditional chatbots, this system retrieves relevant context from documents before generating responses, reducing hallucinations and improving factual accuracy.
+**An Enterprise-Grade Hybrid RAG System for Placement Intelligence using Local LLMs, Persistent ChromaDB, Structured Knowledge Reasoning, and Modular Software Engineering Practices**
 
 ---
 
-## Key Features
+# Overview
 
-### Intelligent Placement Assistant
+Placement Intelligence Hybrid RAG System is an enterprise-style placement intelligence assistant designed to answer placement-related queries using a combination of:
 
-Ask placement-related questions such as:
+* Structured Knowledge Base Reasoning
+* Retrieval-Augmented Generation (RAG)
+* Persistent Vector Search
+* Local LLM Inference
+
+Unlike traditional RAG systems that rely only on vector similarity search, this system combines **structured reasoning over placement company data** with **document retrieval** to improve factual accuracy and reduce hallucinations.
+
+The system intelligently routes queries:
+
+### Structured Queries
+
+Handled through a **Knowledge Base Engine**
+
+Examples:
 
 * What is the package offered by Google?
 * Does Microsoft allow backlogs?
+* Which technology does Flipkart focus on?
+
+### Comparison Queries
+
+Handled using **DataFrame-based reasoning**
+
+Examples:
+
+* Compare Google and Amazon package
+* Compare Google and Microsoft in eligibility and package
+
+### Ranking & Filtering Queries
+
+Handled using **query reasoning logic**
+
+Examples:
+
+* Which company offers highest package?
+* Top 3 companies by package
+* Which company using Python offers highest package?
+* Which companies allow backlogs?
+
+### Document-Based Questions
+
+Handled through **Retrieval-Augmented Generation**
+
+Examples:
+
 * What rounds does TCS conduct?
-* Which company has the highest package?
-* Which companies are bond-free?
+* What are the interview experiences of Amazon?
+
+### Out-of-Scope Questions
+
+Handled with **graceful fallback**
+
+Examples:
+
+* Who is the CEO of TCS?
+* What is Infosys stock price?
 
 ---
 
-### Advanced RAG Pipeline
+# Key Features
 
-Implements a modular retrieval workflow:
+## Intelligent Placement Assistant
 
-```text id="exgpcz"
-Rewrite → Retrieve → Rerank → Refine → Insert → Generate
+Ask placement-related questions such as:
+
+```text id="aqg0xq"
+What is the package offered by Google?
+
+Does Microsoft allow backlogs?
+
+Compare Google and Microsoft package
+
+Which company offers highest package?
+
+Which company using Python offers highest package?
+
+Which companies allow backlogs?
+
+Which company has high package but low CGPA requirement?
+
+What rounds does TCS conduct?
 ```
 
 ---
 
-### Local LLM Architecture
+## Hybrid Query Engine
 
-Runs completely offline using **Ollama**.
+Supports:
 
-#### Language Model
+* Direct Lookup Queries
+* Multi-hop Reasoning
+* Company Comparisons
+* Eligibility Filtering
+* Ranking & Sorting
+* Constraint-Based Search
+* Context-Aware Retrieval
+* Out-of-Corpus Detection
 
-```text id="6nj7f8"
+---
+
+## Hybrid RAG Architecture
+
+The system combines:
+
+```text id="93g67g"
+Knowledge Base Reasoning
+            +
+Persistent ChromaDB Retrieval
+            +
+Local LLM Generation
+```
+
+This ensures:
+
+* Better factual accuracy
+* Reduced hallucinations
+* Faster responses
+* Structured reasoning
+* Improved query handling
+
+---
+
+## Local LLM Architecture
+
+Runs completely offline using **Ollama**
+
+### Language Model
+
+```text id="9nyeyr"
 gemma:2b
 ```
 
-#### Embedding Model
+### Embedding Model
 
-```text id="v7b1t0"
+```text id="c0h1s0"
 nomic-embed-text
 ```
 
-No cloud dependency.
+Benefits:
 
-No API keys.
-
-Privacy preserving.
+* No API cost
+* No cloud dependency
+* Privacy preserving
+* Offline execution
 
 ---
 
-### Persistent Vector Database
+## Persistent Vector Database
 
 Uses **ChromaDB** with persistence.
 
@@ -79,171 +164,198 @@ Benefits:
 * Faster query response
 * No repeated embedding generation
 * Persistent storage across restarts
+* Efficient semantic retrieval
 
 ---
 
-### Professional Software Engineering Design
+## Professional Software Engineering Design
+
+This project follows enterprise software engineering principles:
 
 * Modular Architecture
 * Separation of Concerns
+* Single Responsibility Principle
 * Reusable Components
-* Config-Driven Design
-* Scalable Project Structure
+* Layered Design
+* Config-Driven Development
 * Maintainable Codebase
+* Scalable Folder Structure
 
 ---
 
-## System Architecture
+# System Architecture
 
-```mermaid
-flowchart LR
+```mermaid id="a6h6w9"
+flowchart TD
 
-A[Placement Dataset PDF]
---> B[PDF Extraction]
+A[User Query]
 
-B --> C[Chunking & Deduplication]
+A --> B{Intent Router}
 
-C --> D[Embedding Generation]
+B -->|Structured Query| C[Knowledge Base Engine]
 
-D --> E[(Persistent ChromaDB)]
+B -->|Comparison / Ranking| D[DataFrame Reasoning]
 
-E --> F[Retriever]
+B -->|Document Question| E[Retriever]
 
-F --> G[Context Refinement]
+E --> F[(Persistent ChromaDB)]
 
-G --> H[Prompt Injection]
+F --> G[Relevant Context]
 
-H --> I[Gemma 2B - Ollama]
+G --> H[Gemma 2B - Ollama]
 
-I --> J[Generated Response]
+C --> I[Final Response]
 
-J --> K[Streamlit UI]
+D --> I
+
+H --> I
+
+I --> J[Streamlit UI]
 ```
 
 ---
 
-## UML Sequence Diagram
+# End-to-End Query Flow
 
-### End-to-End Query Processing Flow
-
-```mermaid
+```mermaid id="7mzn91"
 sequenceDiagram
 
 actor User
 
 participant UI as Streamlit UI
 participant App as app.py
-participant Pipeline as RAG Pipeline
-participant VectorDB as ChromaDB
+participant Router as Intent Router
+participant KB as Knowledge Base
+participant DB as ChromaDB
 participant Retriever
 participant Ollama
 
-User->>UI: Enter Question
+User->>UI: Ask Question
 
-UI->>App: Query
+UI->>App: User Query
 
-App->>Pipeline: Build()
+App->>Router: Detect Query Type
 
-Pipeline->>VectorDB: Load Vector Store
+alt Structured Query
 
-alt Database Exists
-    VectorDB-->>Pipeline: Existing DB
-else Database Missing
-    Pipeline->>VectorDB: Create DB
+Router->>KB: Query DataFrame
+
+KB-->>Router: Structured Answer
+
+else Document Query
+
+Router->>Retriever: Retrieve Context
+
+Retriever->>DB: Search Relevant Chunks
+
+DB-->>Retriever: Retrieved Context
+
+Retriever->>Ollama: Prompt + Context
+
+Ollama-->>Retriever: Generated Answer
+
 end
 
-Pipeline->>Retriever: Retrieve Chunks
-
-Retriever-->>Pipeline: Relevant Context
-
-Pipeline->>Ollama: Prompt + Context
-
-Ollama-->>Pipeline: Response
-
-Pipeline-->>UI: Final Answer
+Router-->>UI: Final Answer
 
 UI-->>User: Display Response
 ```
 
 ---
 
-## Component Diagram
+# UML Component Diagram
 
-```mermaid
+```mermaid id="2g7yn6"
 graph TD
 
 A[Streamlit UI]
 
 B[App Controller]
 
-C[PDF Loader]
+C[Intent Router]
 
-D[Chunking Service]
+D[Knowledge Service]
 
-E[Deduplicator]
+E[PDF Loader]
 
-F[Embedding Model]
+F[Chunking Service]
 
-G[(ChromaDB)]
+G[Deduplicator]
 
-H[Retriever]
+H[Embedding Service]
 
-I[Prompt Builder]
+I[(Persistent ChromaDB)]
 
-J[Gemma 2B]
+J[Retriever Service]
+
+K[Prompt Builder]
+
+L[Gemma 2B]
+
+M[Chat Service]
 
 A --> B
 B --> C
+
 C --> D
-D --> E
+C --> J
+
 E --> F
 F --> G
 G --> H
 H --> I
-I --> J
+
+J --> I
+J --> K
+K --> L
+
+D --> M
+L --> M
+
+M --> A
 ```
 
 ---
 
-## Activity Diagram
+# Activity Diagram
 
-```mermaid
+```mermaid id="y6vg6j"
 flowchart TD
 
 A[Start]
 
 A --> B[User Enters Query]
 
-B --> C{Chroma DB Exists?}
+B --> C{Query Type?}
 
-C -->|Yes| D[Load Existing DB]
+C -->|Structured Query| D[Knowledge Base Lookup]
 
-C -->|No| E[Extract PDF]
+C -->|Comparison Query| E[DataFrame Reasoning]
 
-E --> F[Chunk Document]
+C -->|Document Query| F[Retrieve Context]
 
-F --> G[Generate Embeddings]
+F --> G[ChromaDB Search]
 
-G --> H[Store in ChromaDB]
+G --> H[Prompt Generation]
 
-H --> D
+H --> I[Gemma 2B Response]
 
-D --> I[Retrieve Relevant Chunks]
+D --> J[Final Response]
 
-I --> J[Build Context Prompt]
+E --> J
 
-J --> K[Generate Response using Ollama]
+I --> J
 
-K --> L[Display Answer]
+J --> K[Display Answer]
 
-L --> M[End]
+K --> L[End]
 ```
 
 ---
 
-## Project Structure
+# Project Structure
 
-```text id="n3l9y7"
+```text id="khxzy2"
 placement-intelligence-rag/
 │── app.py
 │── config.py
@@ -259,25 +371,30 @@ placement-intelligence-rag/
 ├── src/
 │   ├── ingestion/
 │   │     ├── pdf_loader.py
-│   │     └── chunking.py
+│   │     └── chunking_service.py
 │   │
 │   ├── preprocessing/
 │   │     └── deduplicator.py
 │   │
 │   ├── embeddings/
-│   │     └── embedding_model.py
+│   │     └── embedding_service.py
 │   │
 │   ├── vectordb/
 │   │     └── chroma_manager.py
 │   │
 │   ├── retrieval/
-│   │     └── retriever.py
+│   │     └── retriever_service.py
 │   │
 │   ├── llm/
-│   │     └── ollama_client.py
+│   │     ├── ollama_client.py
+│   │     └── prompt_builder.py
 │   │
-│   └── rag/
-│         └── pipeline.py
+│   ├── rag/
+│   │     └── rag_pipeline.py
+│   │
+│   └── services/
+│         ├── knowledge_service.py
+│         └── chat_service.py
 │
 └── assets/
       └── screenshots/
@@ -285,107 +402,133 @@ placement-intelligence-rag/
 
 ---
 
-## Tech Stack
+# Tech Stack
 
 | Technology       | Purpose               |
 | ---------------- | --------------------- |
 | Python           | Backend Development   |
 | Streamlit        | User Interface        |
 | Ollama           | Local Model Execution |
-| Gemma 2B         | LLM                   |
+| Gemma 2B         | Local LLM             |
 | Nomic Embed Text | Embeddings            |
 | ChromaDB         | Vector Database       |
 | LangChain        | RAG Orchestration     |
+| Pandas           | Structured Reasoning  |
 | PyMuPDF          | PDF Parsing           |
+| PDFPlumber       | Table Extraction      |
 
 ---
 
-## Installation
+# Installation
 
-### Clone Repository
+## Clone Repository
 
-```bash id="ztr31m"
+```bash id="f38zbi"
 git clone https://github.com/your-username/placement-intelligence-rag.git
 ```
 
-```bash id="dqqm5w"
+```bash id="nd2g8k"
 cd placement-intelligence-rag
 ```
 
 ---
 
-### Create Virtual Environment
+## Create Virtual Environment
 
-```bash id="w0htte"
+```bash id="q2f5m8"
 py -3.11 -m venv venv
 ```
 
-Activate:
+### Activate Environment
 
-```bash id="vayb20"
+```bash id="tkp5mn"
 .\venv\Scripts\Activate.ps1
 ```
 
 ---
 
-### Install Dependencies
+## Install Dependencies
 
-```bash id="qjz29m"
+```bash id="xw8skz"
 pip install -r requirements.txt
 ```
 
 ---
 
-### Install Ollama Models
+## Install Ollama Models
 
-```bash id="y0i98n"
+```bash id="4k0r0v"
 ollama pull gemma:2b
 ```
 
-```bash id="gl1rji"
+```bash id="j3hfw3"
 ollama pull nomic-embed-text
 ```
 
 ---
 
-### Run Application
+## Run Application
 
-```bash id="1mjlwm"
+```bash id="v2b7u1"
 streamlit run app.py
 ```
 
 ---
 
-## Example Queries
+# Example Queries
 
-```text id="8twh1r"
+```text id="3mg54k"
 What is the package offered by Google?
 
 Does Microsoft allow backlogs?
 
+Compare Google and Amazon package
+
+Compare Google and Microsoft in eligibility and package
+
+Which company offers highest package?
+
+Top 3 companies by package
+
+Which companies use Python?
+
+Which company has high package but low CGPA requirement?
+
 What rounds does TCS conduct?
 
-Which companies are bond-free?
-
-Which company has highest package?
+Who is the CEO of TCS?
 ```
 
 ---
 
-## Software Engineering Practices Followed
+# Software Engineering Practices Followed
 
 * Modular Architecture
-* Layered Design
-* Single Responsibility Principle
-* Reusable Components
-* Persistent Storage
-* Config-Based Parameters
 * Separation of Concerns
-* Clean Folder Structure
+* Single Responsibility Principle
+* Layered Architecture
+* Config-Driven Development
+* Persistent Storage
+* Reusable Components
+* Hybrid Query Routing
+* Graceful Error Handling
 * Maintainable Codebase
 
 ---
 
+# Future Improvements
 
+* Multimodal RAG for Charts & Images
+* Query Rewriting
+* Metadata-Based Filtering
+* Reranking Layer
+* Chat History Persistence
+* Advanced Eligibility Prediction
+* Placement Analytics Dashboard
 
+---
 
+## Author
+
+**Placement Intelligence Hybrid RAG System**
+Built using Local LLMs, Hybrid RAG, and Modular Software Engineering Practices.
