@@ -501,34 +501,6 @@ Who is the CEO of TCS?
 
 ---
 
-# Software Engineering Practices Followed
 
-* Modular Architecture
-* Separation of Concerns
-* Single Responsibility Principle
-* Layered Architecture
-* Config-Driven Development
-* Persistent Storage
-* Reusable Components
-* Hybrid Query Routing
-* Graceful Error Handling
-* Maintainable Codebase
 
----
 
-# Future Improvements
-
-* Multimodal RAG for Charts & Images
-* Query Rewriting
-* Metadata-Based Filtering
-* Reranking Layer
-* Chat History Persistence
-* Advanced Eligibility Prediction
-* Placement Analytics Dashboard
-
----
-
-## Author
-
-**Placement Intelligence Hybrid RAG System**
-Built using Local LLMs, Hybrid RAG, and Modular Software Engineering Practices.
