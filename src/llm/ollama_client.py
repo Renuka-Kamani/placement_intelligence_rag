@@ -1,9 +1,5 @@
 from langchain_ollama import (
-    ChatOllama
-)
-
-from config import (
-    LLM_MODEL
+    OllamaLLM
 )
 
 
@@ -12,7 +8,6 @@ class OllamaClient:
     @staticmethod
     def load():
 
-        return ChatOllama(
-            model=LLM_MODEL,
-            temperature=0
+        return OllamaLLM(
+            model="tinyllama"
         )

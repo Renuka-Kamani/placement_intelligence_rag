@@ -1,7 +1,7 @@
 import streamlit as st
 
-from src.rag.pipeline import (
-    RAGPipeline
+from src.services.chat_service import (
+    ChatService
 )
 
 
@@ -15,14 +15,14 @@ st.title(
 )
 
 
-# Store chat history
 if "messages" not in st.session_state:
 
     st.session_state.messages = []
 
 
-# Show previous chats
-for message in st.session_state.messages:
+for message in (
+    st.session_state.messages
+):
 
     with st.chat_message(
         message["role"]
@@ -33,7 +33,6 @@ for message in st.session_state.messages:
         )
 
 
-# User input
 question = st.chat_input(
     "Ask a placement-related question"
 )
@@ -41,7 +40,6 @@ question = st.chat_input(
 
 if question:
 
-    # Show user message
     with st.chat_message(
         "user"
     ):
@@ -59,60 +57,21 @@ if question:
         "Thinking..."
     ):
 
-        try:
-
-            retriever, llm = (
-                RAGPipeline.build()
-            )
-
-            # Retrieve relevant docs
-            docs = retriever.invoke(
+        result = (
+            ChatService
+            .ask_question(
                 question
             )
+        )
 
-            # Limit context size
-            context = "\n\n".join(
-                [
-                    doc.page_content[:400]
-                    for doc in docs
-                ]
-            )
+        answer = (
+            result["answer"]
+        )
 
-            # Small prompt for low RAM laptop
-            prompt = f"""
-You are a Placement Intelligence Assistant.
+        context = (
+            result["context"]
+        )
 
-Rules:
-1. Answer ONLY from context.
-2. Give exact values if present.
-3. If rounds exist, list them clearly.
-4. If answer is not found say:
-"I don't have enough information in the document."
-
-Context:
-{context}
-
-Question:
-{question}
-
-Answer:
-"""
-
-            response = llm.invoke(
-                prompt
-            )
-
-            answer = (
-                response.content
-            )
-
-        except Exception as e:
-
-            answer = (
-                f"Error: {str(e)}"
-            )
-
-    # Show assistant response
     with st.chat_message(
         "assistant"
     ):
@@ -126,7 +85,6 @@ Answer:
         }
     )
 
-    # Debug section
     with st.expander(
         "Retrieved Context"
     ):

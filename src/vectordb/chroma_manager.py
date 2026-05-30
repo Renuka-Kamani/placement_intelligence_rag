@@ -13,7 +13,7 @@ from src.ingestion.pdf_loader import (
     PDFLoader
 )
 
-from src.ingestion.chunking import (
+from src.ingestion.chunking_service import (
     ChunkingService
 )
 
@@ -21,7 +21,7 @@ from src.preprocessing.deduplicator import (
     Deduplicator
 )
 
-from src.embeddings.embedding_model import (
+from src.embeddings.embedding_service import (
     EmbeddingModel
 )
 
@@ -36,9 +36,14 @@ class ChromaManager:
 
     def create_or_load_db(self):
 
+        # Load existing database
         if os.path.exists(
             CHROMA_PATH
         ):
+
+            print(
+                "Loading existing ChromaDB..."
+            )
 
             return Chroma(
                 persist_directory=CHROMA_PATH,
@@ -49,6 +54,7 @@ class ChromaManager:
             "Extracting PDF..."
         )
 
+        # Extract text
         text = (
             PDFLoader.extract_text(
                 PDF_PATH
@@ -56,14 +62,20 @@ class ChromaManager:
         )
 
         print(
-            text[:2000]
+            "Chunking document..."
         )
 
+        # Split into chunks
         chunks = (
             ChunkingService
             .split_text(text)
         )
 
+        print(
+            "Removing duplicate chunks..."
+        )
+
+        # Remove duplicates
         unique_chunks = (
             Deduplicator
             .remove_duplicates(
@@ -71,22 +83,19 @@ class ChromaManager:
             )
         )
 
-        documents = []
+        print(
+            "Creating Vector Database..."
+        )
 
-        for chunk in unique_chunks:
-
-            documents.append(
-                chunk
-            )
-
+        # Create vector database
         db = Chroma.from_texts(
-            texts=documents,
+            texts=unique_chunks,
             embedding=self.embeddings,
             persist_directory=CHROMA_PATH
         )
 
         print(
-            "Vector DB Created"
+            "Vector DB Created Successfully"
         )
 
         return db
