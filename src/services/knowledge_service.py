@@ -1,3 +1,4 @@
+
 import pandas as pd
 
 
@@ -16,7 +17,19 @@ class KnowledgeService:
                 "Amazon",
                 "Flipkart",
                 "Google",
-                "Microsoft"
+                "Microsoft",
+                "Wipro",
+                "Cognizant",
+                "Capgemini",
+                "IBM",
+                "Adobe",
+                "Oracle",
+                "SAP",
+                "HCL",
+                "Tech Mahindra",
+                "Qualcomm",
+                "Intel",
+                "Samsung R&D"
             ],
 
             "CGPA": [
@@ -27,7 +40,19 @@ class KnowledgeService:
                 6.4,
                 7.8,
                 7.4,
-                6.1
+                6.1,
+                6.7,
+                8.4,
+                7.1,
+                7.5,
+                7.5,
+                7.7,
+                8.4,
+                8.4,
+                8.1,
+                7.2,
+                7.0,
+                6.3
             ],
 
             "Backlogs": [
@@ -38,7 +63,19 @@ class KnowledgeService:
                 1,
                 2,
                 0,
-                1
+                1,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0
             ],
 
             "Package": [
@@ -49,7 +86,42 @@ class KnowledgeService:
                 28.6,
                 25.3,
                 42.0,
-                21.0
+                21.0,
+                22.2,
+                34.2,
+                29.1,
+                18.4,
+                15.2,
+                13.8,
+                17.5,
+                21.3,
+                28.7,
+                33.2,
+                32.5,
+                6.4
+            ],
+
+            "Bond": [
+                0,
+                0,
+                1,
+                2,
+                2,
+                2,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
             ],
 
             "Focus": [
@@ -60,10 +132,20 @@ class KnowledgeService:
                 "C++",
                 "Python",
                 "Python",
-                "C++"
+                "C++",
+                "Java",
+                "Java",
+                "Cloud",
+                "DBMS",
+                "Algorithms",
+                "Database",
+                "SAP",
+                "Networking",
+                "Java",
+                "Embedded Systems",
+                "C++",
+                "Hardware"
             ]
         }
 
-        return pd.DataFrame(
-            data
-        )
+        return pd.DataFrame(data)

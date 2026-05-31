@@ -1,3 +1,4 @@
+
 from src.services.knowledge_service import (
     KnowledgeService
 )
@@ -27,274 +28,7 @@ class ChatService:
             df["Company"]
         )
 
-        # ------------------
-        # Compare package
-        # ------------------
-
-        if (
-            "compare" in q
-            and "package" in q
-        ):
-
-            found = []
-
-            for company in companies:
-
-                if (
-                    company.lower()
-                    in q
-                ):
-
-                    row = (
-                        df[
-                            df[
-                                "Company"
-                            ]
-                            == company
-                        ]
-                    )
-
-                    package = (
-                        row[
-                            "Package"
-                        ]
-                        .values[0]
-                    )
-
-                    found.append(
-                        f"{company}: "
-                        f"{package} LPA"
-                    )
-
-            if found:
-
-                return {
-
-                    "answer":
-                    ", ".join(found),
-
-                    "context":
-                    "Knowledge Base"
-                }
-
-        # ------------------
-        # Compare eligibility + package
-        # ------------------
-
-        if (
-            "compare" in q
-            and "eligibility" in q
-        ):
-
-            found = []
-
-            for company in companies:
-
-                if (
-                    company.lower()
-                    in q
-                ):
-
-                    row = (
-                        df[
-                            df[
-                                "Company"
-                            ]
-                            == company
-                        ]
-                    )
-
-                    cgpa = (
-                        row[
-                            "CGPA"
-                        ]
-                        .values[0]
-                    )
-
-                    package = (
-                        row[
-                            "Package"
-                        ]
-                        .values[0]
-                    )
-
-                    found.append(
-
-                        f"{company}: "
-                        f"CGPA {cgpa}, "
-                        f"Package "
-                        f"{package} LPA"
-
-                    )
-
-            if found:
-
-                return {
-
-                    "answer":
-                    " | ".join(found),
-
-                    "context":
-                    "Knowledge Base"
-                }
-
-        # ------------------
-        # Highest package
-        # ------------------
-
-        if (
-            "highest package"
-            in q
-            or
-            "offers highest package"
-            in q
-        ):
-
-            highest = (
-                df.sort_values(
-                    "Package",
-                    ascending=False
-                )
-                .iloc[0]
-            )
-
-            return {
-
-                "answer":
-                f"{highest['Company']} "
-                f"offers the highest "
-                f"package at "
-                f"{highest['Package']} "
-                f"LPA.",
-
-                "context":
-                "Knowledge Base"
-            }
-
-        # ------------------
-        # Lowest package
-        # ------------------
-
-        if (
-            "lowest package"
-            in q
-        ):
-
-            lowest = (
-                df.sort_values(
-                    "Package"
-                )
-                .iloc[0]
-            )
-
-            return {
-
-                "answer":
-                f"{lowest['Company']} "
-                f"offers the lowest "
-                f"package at "
-                f"{lowest['Package']} "
-                f"LPA.",
-
-                "context":
-                "Knowledge Base"
-            }
-
-        # ------------------
-        # Python highest package
-        # ------------------
-
-        if (
-            "python"
-            in q
-            and
-            "highest package"
-            in q
-        ):
-
-            filtered = (
-                df[
-                    df[
-                        "Focus"
-                    ]
-                    == "Python"
-                ]
-            )
-
-            highest = (
-                filtered
-                .sort_values(
-                    "Package",
-                    ascending=False
-                )
-                .iloc[0]
-            )
-
-            return {
-
-                "answer":
-                f"{highest['Company']} "
-                f"offers the highest "
-                f"package among "
-                f"Python-focused "
-                f"companies at "
-                f"{highest['Package']} "
-                f"LPA.",
-
-                "context":
-                "Knowledge Base"
-            }
-
-        # ------------------
-        # High package + low CGPA
-        # ------------------
-
-        if (
-            "high package" in q
-            and
-            "low cgpa" in q
-        ):
-
-            filtered = (
-                df[
-                    (
-                        df["Package"]
-                        > 20
-                    )
-                    &
-                    (
-                        df["CGPA"]
-                        < 7
-                    )
-                ]
-            )
-
-            if len(filtered) > 0:
-
-                company_names = (
-                    ", ".join(
-                        filtered[
-                            "Company"
-                        ]
-                        .tolist()
-                    )
-                )
-
-                return {
-
-                    "answer":
-                    f"{company_names} "
-                    f"have high packages "
-                    f"with low CGPA "
-                    f"requirements.",
-
-                    "context":
-                    "Knowledge Base"
-                }
-
-        # ------------------
-        # Direct company lookup
-        # ------------------
+        mentioned = []
 
         for company in companies:
 
@@ -303,6 +37,96 @@ class ChatService:
                 in q
             ):
 
+                mentioned.append(
+                    company
+                )
+
+        # -------------------
+        # Top / highest
+        # -------------------
+
+        if (
+            "highest package"
+            in q
+            or
+            "top company"
+            in q
+        ):
+
+            top = (
+                df.sort_values(
+                    "Package",
+                    ascending=False
+                )
+                .iloc[0]
+            )
+
+            return {
+
+                "answer":
+                f"{top['Company']} "
+                f"offers the highest "
+                f"package at "
+                f"{top['Package']} LPA.",
+
+                "context":
+                "Knowledge Base"
+            }
+
+        # -------------------
+        # Top 3
+        # -------------------
+
+        if (
+            "top 3"
+            in q
+            and
+            "package"
+            in q
+        ):
+
+            top3 = (
+                df.sort_values(
+                    "Package",
+                    ascending=False
+                )
+                .head(3)
+            )
+
+            result = []
+
+            for _, row in (
+                top3.iterrows()
+            ):
+
+                result.append(
+
+                    f"{row['Company']} "
+                    f"({row['Package']} LPA)"
+
+                )
+
+            return {
+
+                "answer":
+                ", ".join(
+                    result
+                ),
+
+                "context":
+                "Knowledge Base"
+            }
+
+        # -------------------
+        # Company-specific
+        # -------------------
+
+        if len(mentioned):
+
+            responses = []
+
+            for company in mentioned:
+
                 row = (
                     df[
                         df[
@@ -310,129 +134,86 @@ class ChatService:
                         ]
                         == company
                     ]
+                    .iloc[0]
                 )
 
-                # Package
                 if (
                     "package"
                     in q
                 ):
 
-                    package = (
-                        row[
-                            "Package"
-                        ]
-                        .values[0]
+                    responses.append(
+                        f"{company}: "
+                        f"{row['Package']} LPA"
                     )
 
-                    return {
-
-                        "answer":
-                        f"{company} "
-                        f"offers "
-                        f"{package} "
-                        f"LPA.",
-
-                        "context":
-                        "Knowledge Base"
-                    }
-
-                # CGPA
-                if (
+                elif (
                     "cgpa"
                     in q
                 ):
 
-                    cgpa = (
-                        row[
-                            "CGPA"
-                        ]
-                        .values[0]
+                    responses.append(
+                        f"{company}: "
+                        f"{row['CGPA']} CGPA"
                     )
 
-                    return {
-
-                        "answer":
-                        f"{company} "
-                        f"requires "
-                        f"{cgpa} CGPA.",
-
-                        "context":
-                        "Knowledge Base"
-                    }
-
-                # Backlogs
-                if (
+                elif (
                     "backlog"
                     in q
                 ):
 
-                    backlogs = (
-                        row[
-                            "Backlogs"
-                        ]
-                        .values[0]
+                    responses.append(
+                        f"{company}: "
+                        f"{row['Backlogs']} backlog(s)"
                     )
 
-                    if (
-                        backlogs > 0
-                    ):
-
-                        return {
-
-                            "answer":
-                            f"Yes, "
-                            f"{company} "
-                            f"allows "
-                            f"{backlogs} "
-                            f"backlog(s).",
-
-                            "context":
-                            "Knowledge Base"
-                        }
-
-                    return {
-
-                        "answer":
-                        f"No, "
-                        f"{company} "
-                        f"does not allow "
-                        f"backlogs.",
-
-                        "context":
-                        "Knowledge Base"
-                    }
-
-                # Technology focus
-                if (
-                    "technology"
+                elif (
+                    "focus"
                     in q
                     or
-                    "focus"
+                    "technology"
                     in q
                 ):
 
-                    focus = (
-                        row[
-                            "Focus"
-                        ]
-                        .values[0]
+                    responses.append(
+                        f"{company}: "
+                        f"{row['Focus']}"
                     )
 
-                    return {
+                elif (
+                    "eligibility"
+                    in q
+                    or
+                    "criteria"
+                    in q
+                ):
 
-                        "answer":
-                        f"{company} "
-                        f"focuses on "
-                        f"{focus}.",
+                    responses.append(
 
-                        "context":
-                        "Knowledge Base"
-                    }
+                        f"{company}: "
+                        f"CGPA "
+                        f"{row['CGPA']}, "
+                        f"Backlogs "
+                        f"{row['Backlogs']}"
 
-        # ------------------
-        # Fallback RAG
-        # ------------------
+                    )
+
+            if responses:
+
+                return {
+
+                    "answer":
+                    " | ".join(
+                        responses
+                    ),
+
+                    "context":
+                    "Knowledge Base"
+                }
+
+        # -------------------
+        # fallback rag
+        # -------------------
 
         retriever, llm = (
             RAGPipeline.build()
@@ -471,3 +252,4 @@ class ChatService:
             "context":
             context
         }
+
