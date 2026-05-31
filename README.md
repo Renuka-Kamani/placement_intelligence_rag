@@ -484,9 +484,6 @@ Does Microsoft allow backlogs?
 
 Compare Google and Amazon package
 
-Compare Google and Microsoft in eligibility and package
-
-Which company offers highest package?
 
 Top 3 companies by package
 
