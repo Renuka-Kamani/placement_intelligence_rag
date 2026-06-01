@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "placement-intelligence-rag"
+version = "1.0.0"
+description = "Hybrid RAG Placement Intelligence Assistant"
+requires-python = ">=3.11"
+
+[tool.setuptools]
+package-dir = {"" = "."}
