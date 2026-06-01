@@ -1,37 +1,14 @@
-```gitignore
-# Virtual Environment
 venv/
-env/
-
-# Python Cache
-__pycache__/
+**pycache**/
 *.pyc
-*.pyo
 
-# Chroma Database
-chroma_db/
-
-# Streamlit
-.streamlit/
-
-# VS Code
-.vscode/
-
-# OS Files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Environment Variables
 .env
 
-# Jupyter
-.ipynb_checkpoints/
+chroma_db/
 
-# Python build
-build/
-dist/
-*.egg-info/
-```
+logs/
+
+.streamlit/
+
+.idea/
+.vscode/

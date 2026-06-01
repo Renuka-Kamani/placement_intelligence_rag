@@ -1,6 +1,16 @@
 class Deduplicator:
 
     @staticmethod
-    def remove_duplicates(chunks):
+    def remove_duplicates(
+        chunks: list[str]
+    ) -> list[str]:
 
-        return list(set(chunks))
+        unique_chunks = (
+            list(
+                dict.fromkeys(
+                    chunks
+                )
+            )
+        )
+
+        return unique_chunks

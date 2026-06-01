@@ -1,5 +1,18 @@
+
 from langchain_ollama import (
-    OllamaLLM
+    ChatOllama
+)
+
+from src.config.settings import (
+    settings
+)
+
+from src.core.logger import (
+    logger
+)
+
+from src.exceptions.custom_exceptions import (
+    OllamaConnectionError
 )
 
 
@@ -8,8 +21,28 @@ class OllamaClient:
     @staticmethod
     def load():
 
-        return OllamaLLM(
-            model="gemma:2b",
-            temperature=0.1,
-            num_ctx=2048
-        )
+        try:
+
+            logger.info(
+                "Loading Ollama "
+                "model"
+            )
+
+            return ChatOllama(
+                model=settings
+                .OLLAMA_MODEL
+            )
+
+        except Exception as e:
+
+            logger.error(
+                str(e)
+            )
+
+            raise (
+                OllamaConnectionError(
+                    "Ollama model "
+                    "not available."
+                )
+            )
+

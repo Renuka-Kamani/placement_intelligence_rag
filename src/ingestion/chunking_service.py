@@ -1,50 +1,29 @@
+from langchain_text_splitters import (
+    RecursiveCharacterTextSplitter
+)
+
+
 class ChunkingService:
 
     @staticmethod
-    def split_text(text):
+    def split_text(
+        text: str
+    ) -> list[str]:
 
-        chunks = []
+        splitter = (
+            RecursiveCharacterTextSplitter(
 
-        lines = (
-            text.split("\n")
+                chunk_size=500,
+
+                chunk_overlap=100
+            )
         )
 
-        bad_keywords = [
-
-            "Easy Direct table lookup",
-            "Hard Conflict",
-            "Hop Type",
-            "RAG Challenge",
-            "Judges will use",
-            "Question Difficulty",
-            "Full synthesis",
-            "Expert"
-
-        ]
-
-        for line in lines:
-
-            line = line.strip()
-
-            if len(line) < 30:
-                continue
-
-            skip = False
-
-            for keyword in (
-                bad_keywords
-            ):
-
-                if keyword in line:
-
-                    skip = True
-                    break
-
-            if skip:
-                continue
-
-            chunks.append(
-                line
+        chunks = (
+            splitter
+            .split_text(
+                text
             )
+        )
 
         return chunks

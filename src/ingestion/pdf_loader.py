@@ -1,66 +1,63 @@
-import pdfplumber
-import pandas as pd
+
+import os
+import fitz
+
+from src.core.logger import (
+    logger
+)
+
+from src.exceptions.custom_exceptions import (
+    PDFNotFoundError
+)
 
 
 class PDFLoader:
 
     @staticmethod
-    def extract_text(pdf_path):
+    def extract_text(
+        pdf_path: str
+    ) -> str:
 
-        text_chunks = []
+        try:
 
-        with pdfplumber.open(
-            pdf_path
-        ) as pdf:
+            if not os.path.exists(
+                pdf_path
+            ):
 
-            for page in pdf.pages:
-
-                # Extract normal text
-                text = (
-                    page.extract_text()
+                raise PDFNotFoundError(
+                    f"PDF not found: "
+                    f"{pdf_path}"
                 )
 
-                if text:
+            logger.info(
+                f"Loading PDF: "
+                f"{pdf_path}"
+            )
 
-                    text_chunks.append(
-                        text
-                    )
+            doc = fitz.open(
+                pdf_path
+            )
 
-                # Extract tables
-                tables = (
-                    page.extract_tables()
+            text = ""
+
+            for page in doc:
+
+                text += (
+                    page.get_text()
                 )
 
-                for table in tables:
+            logger.info(
+                "PDF extraction "
+                "completed"
+            )
 
-                    try:
+            return text
 
-                        df = pd.DataFrame(
-                            table[1:],
-                            columns=table[0]
-                        )
+        except Exception as e:
 
-                        for _, row in (
-                            df.iterrows()
-                        ):
+            logger.error(
+                str(e)
+            )
 
-                            row_text = (
-                                " | ".join(
-                                    [
-                                        f"{col}: {row[col]}"
-                                        for col in df.columns
-                                    ]
-                                )
-                            )
+            raise
 
-                            text_chunks.append(
-                                row_text
-                            )
-
-                    except:
-
-                        continue
-
-        return "\n".join(
-            text_chunks
-        )

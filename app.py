@@ -4,131 +4,77 @@ from src.services.chat_service import (
     ChatService
 )
 
-# -------------------------
-# Page Config
-# -------------------------
+from src.services.knowledge_service import (
+    KnowledgeService
+)
+
+from src.tools.rag_tool import (
+    RAGTool
+)
+
 
 st.set_page_config(
-    page_title="Placement Intelligence Assistant",
+
+    page_title=
+    "Placement Intelligence",
+
     page_icon="🎓",
+
     layout="wide"
 )
 
-# -------------------------
-# Custom CSS
-# -------------------------
 
-st.markdown("""
-<style>
+@st.cache_resource
+def get_chat_service():
 
-.main {
-    background-color: #0e1117;
-}
+    return ChatService(
 
-.stChatMessage {
-    border-radius: 15px;
-    padding: 10px;
-}
+        knowledge_service=
+        KnowledgeService(),
 
-.user-box {
-    background: #1f2937;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-}
+        rag_tool=
+        RAGTool()
+    )
 
-.bot-box {
-    background: #111827;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    border-left: 4px solid #00ADB5;
-}
 
-.big-title {
-    font-size: 38px;
-    font-weight: bold;
-    color: white;
-}
-
-.subtitle {
-    color: #9CA3AF;
-    margin-bottom: 20px;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# -------------------------
-# Sidebar
-# -------------------------
-
-with st.sidebar:
-
-    st.title("⚙️ Settings")
-
-    st.markdown("---")
-
-    st.subheader("Supported Features")
-
-    st.markdown("""
-    ✅ Package Queries  
-    ✅ Eligibility Queries  
-    ✅ Company Comparison  
-    ✅ Multi-hop Reasoning  
-    ✅ Ranking Queries  
-    ✅ Document Retrieval  
-    """)
-
-    st.markdown("---")
-
-    st.subheader("Quick Questions")
-
-    sample_questions = [
-
-        "What is package offered by Google?",
-
-        "Compare Google and Microsoft package",
-
-        "Which company offers highest package?",
-
-        "Which company using Python offers highest package?",
-
-        "Eligibility criteria for Amazon"
-
-    ]
-
-# -------------------------
-# Header
-# -------------------------
-
-st.markdown(
-    '<div class="big-title">'
-    '🎓 Placement Intelligence Assistant'
-    '</div>',
-    unsafe_allow_html=True
+chat_service = (
+    get_chat_service()
 )
 
-st.markdown(
-    '<div class="subtitle">'
-    'Hybrid RAG + Knowledge Base Placement Assistant'
-    '</div>',
-    unsafe_allow_html=True
-)
-
-# -------------------------
-# Session State
-# -------------------------
 
 if "messages" not in st.session_state:
 
     st.session_state.messages = []
 
-# -------------------------
-# Display Chat
-# -------------------------
 
-for message in st.session_state.messages:
+st.markdown(
+
+    """
+    <h1 style='text-align:center'>
+    🎓 Placement Intelligence Assistant
+    </h1>
+    """,
+
+    unsafe_allow_html=True
+)
+
+
+with st.sidebar:
+
+    st.title(
+        "Chat History"
+    )
+
+    if st.button(
+        "Clear Chat"
+    ):
+
+        st.session_state.messages = []
+
+
+for message in (
+    st.session_state.messages
+):
 
     with st.chat_message(
         message["role"]
@@ -138,67 +84,77 @@ for message in st.session_state.messages:
             message["content"]
         )
 
-# -------------------------
-# Input
-# -------------------------
 
-prompt = st.chat_input(
-    "Ask placement-related questions..."
+question = st.chat_input(
+    "Ask anything..."
 )
 
-# -------------------------
-# Process Query
-# -------------------------
 
-if prompt:
+if question:
 
-    st.session_state.messages.append({
+    st.session_state.messages.append(
 
-        "role": "user",
+        {
 
-        "content": prompt
-    })
+            "role":
+            "user",
 
-    with st.chat_message("user"):
+            "content":
+            question
+        }
+    )
 
-        st.markdown(prompt)
+    with st.chat_message(
+        "user"
+    ):
 
-    with st.chat_message("assistant"):
+        st.markdown(
+            question
+        )
 
-        with st.spinner(
-            "Thinking..."
+    with st.spinner(
+        "Thinking..."
+    ):
+
+        response = (
+            chat_service
+            .ask_question(
+                question
+            )
+        )
+
+    answer = (
+        response[
+            "answer"
+        ]
+    )
+
+    with st.chat_message(
+        "assistant"
+    ):
+
+        st.markdown(
+            answer
+        )
+
+        with st.expander(
+            "Source"
         ):
 
-            response = (
-                ChatService
-                .ask_question(prompt)
-            )
-
-            answer = (
-                response[
-                    "answer"
-                ]
-            )
-
-            context = (
+            st.write(
                 response[
                     "context"
                 ]
             )
 
-            st.markdown(answer)
+    st.session_state.messages.append(
 
-            with st.expander(
-                "Retrieved Context"
-            ):
+        {
 
-                st.write(
-                    context
-                )
+            "role":
+            "assistant",
 
-    st.session_state.messages.append({
-
-        "role": "assistant",
-
-        "content": answer
-    })
+            "content":
+            answer
+        }
+    )

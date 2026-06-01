@@ -1,12 +1,16 @@
+
 import os
 
 from langchain_community.vectorstores import (
     Chroma
 )
 
-from config import (
-    PDF_PATH,
-    CHROMA_PATH
+from src.config.settings import (
+    settings
+)
+
+from src.core.logger import (
+    logger
 )
 
 from src.ingestion.pdf_loader import (
@@ -22,7 +26,11 @@ from src.preprocessing.deduplicator import (
 )
 
 from src.embeddings.embedding_service import (
-    EmbeddingModel
+    EmbeddingService
+)
+
+from src.exceptions.custom_exceptions import (
+    ChromaDBError
 )
 
 
@@ -31,71 +39,95 @@ class ChromaManager:
     def __init__(self):
 
         self.embeddings = (
-            EmbeddingModel.load()
+            EmbeddingService
+            .load()
         )
 
     def create_or_load_db(self):
 
-        # Load existing database
-        if os.path.exists(
-            CHROMA_PATH
-        ):
+        try:
 
-            print(
-                "Loading existing ChromaDB..."
+            if os.path.exists(
+                settings
+                .CHROMA_PATH
+            ):
+
+                logger.info(
+                    "Loading "
+                    "existing "
+                    "ChromaDB"
+                )
+
+                return Chroma(
+
+                    persist_directory=
+                    settings
+                    .CHROMA_PATH,
+
+                    embedding_function=
+                    self.embeddings
+                )
+
+            logger.info(
+                "Creating "
+                "new ChromaDB"
             )
 
-            return Chroma(
-                persist_directory=CHROMA_PATH,
-                embedding_function=self.embeddings
+            text = (
+                PDFLoader
+                .extract_text(
+                    settings
+                    .PDF_PATH
+                )
             )
 
-        print(
-            "Extracting PDF..."
-        )
-
-        # Extract text
-        text = (
-            PDFLoader.extract_text(
-                PDF_PATH
+            chunks = (
+                ChunkingService
+                .split_text(
+                    text
+                )
             )
-        )
 
-        print(
-            "Chunking document..."
-        )
-
-        # Split into chunks
-        chunks = (
-            ChunkingService
-            .split_text(text)
-        )
-
-        print(
-            "Removing duplicate chunks..."
-        )
-
-        # Remove duplicates
-        unique_chunks = (
-            Deduplicator
-            .remove_duplicates(
-                chunks
+            chunks = (
+                Deduplicator
+                .remove_duplicates(
+                    chunks
+                )
             )
-        )
 
-        print(
-            "Creating Vector Database..."
-        )
+            db = (
+                Chroma
+                .from_texts(
 
-        # Create vector database
-        db = Chroma.from_texts(
-            texts=unique_chunks,
-            embedding=self.embeddings,
-            persist_directory=CHROMA_PATH
-        )
+                    texts=chunks,
 
-        print(
-            "Vector DB Created Successfully"
-        )
+                    embedding=
+                    self.embeddings,
 
-        return db
+                    persist_directory=
+                    settings
+                    .CHROMA_PATH
+                )
+            )
+
+            logger.info(
+                "ChromaDB "
+                "created"
+            )
+
+            return db
+
+        except Exception as e:
+
+            logger.error(
+                str(e)
+            )
+
+            raise (
+                ChromaDBError(
+                    "Failed to "
+                    "create/load "
+                    "ChromaDB"
+                )
+            )
+

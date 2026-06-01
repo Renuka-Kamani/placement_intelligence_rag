@@ -2,27 +2,26 @@ class PromptBuilder:
 
     @staticmethod
     def build_prompt(
-        context,
-        question
+        context: str,
+        question: str
     ):
 
         return f"""
-You are a strict extraction system.
+You are a placement intelligence assistant.
 
 RULES:
 - ONLY answer from context
-- NEVER explain
+- NEVER hallucinate
 - NEVER guess
-- Return exact values
-- Keep answer under one sentence
-- If missing:
+- Keep answer short
+- If missing say:
 "I don't have enough information in the document."
 
-CONTEXT:
+Context:
 {context}
 
-QUESTION:
+Question:
 {question}
 
-ANSWER:
+Answer:
 """

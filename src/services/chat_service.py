@@ -1,61 +1,154 @@
-
-from src.services.knowledge_service import (
-    KnowledgeService
+from src.router.intent_router import (
+    IntentRouter
 )
 
-from src.rag.rag_pipeline import (
-    RAGPipeline
+from src.tools.rag_tool import (
+    RAGTool
 )
 
-from src.llm.prompt_builder import (
-    PromptBuilder
+from src.tools.web_search_tool import (
+    WebSearchTool
 )
 
 
 class ChatService:
 
-    @staticmethod
-    def ask_question(question):
+    def __init__(
 
-        q = question.lower()
+        self,
 
-        df = (
-            KnowledgeService
-            .load_company_data()
+        knowledge_service,
+
+        rag_tool
+
+    ):
+
+        self.knowledge = (
+            knowledge_service
         )
 
-        companies = list(
-            df["Company"]
+        self.rag_tool = (
+            rag_tool
         )
 
-        mentioned = []
+        self.web_tool = (
+            WebSearchTool()
+        )
 
-        for company in companies:
+    def ask_question(
+        self,
+        question: str
+    ):
+
+        intent = (
+            IntentRouter
+            .detect_intent(
+                question
+            )
+        )
+
+        if intent == (
+            "mysql"
+        ):
+
+            result = (
+                self
+                .handle_sql_query(
+                    question
+                )
+            )
 
             if (
-                company.lower()
-                in q
+                "don't have"
+                not in
+                result[
+                    "answer"
+                ].lower()
             ):
 
-                mentioned.append(
-                    company
-                )
+                return result
 
-        # -------------------
-        # Top / highest
-        # -------------------
+        elif intent == (
+            "web"
+        ):
+
+            answer = (
+                self.web_tool
+                .search(
+                    question
+                )
+            )
+
+            return {
+
+                "answer":
+                answer,
+
+                "context":
+                "Web Search"
+            }
+
+        result = (
+            self.rag_tool
+            .run(
+                question
+            )
+        )
+
+        if (
+
+            "don't have enough"
+            in result[
+                "answer"
+            ].lower()
+
+        ):
+
+            answer = (
+                self.web_tool
+                .search(
+                    question
+                )
+            )
+
+            return {
+
+                "answer":
+                answer,
+
+                "context":
+                "Web Fallback"
+            }
+
+        return result
+
+    def handle_sql_query(
+        self,
+        question
+    ):
+
+        q = (
+            question
+            .lower()
+        )
+
+        df = (
+            self
+            .knowledge
+            .get_dataframe()
+        )
+
+        # highest package
 
         if (
             "highest package"
             in q
-            or
-            "top company"
-            in q
         ):
 
-            top = (
-                df.sort_values(
-                    "Package",
+            row = (
+                df
+                .sort_values(
+                    "package_lpa",
                     ascending=False
                 )
                 .iloc[0]
@@ -64,75 +157,37 @@ class ChatService:
             return {
 
                 "answer":
-                f"{top['Company']} "
-                f"offers the highest "
-                f"package at "
-                f"{top['Package']} LPA.",
+                f"{row['company_name']} "
+                f"offers the "
+                f"highest package "
+                f"at "
+                f"{row['package_lpa']} "
+                f"LPA.",
 
                 "context":
-                "Knowledge Base"
+                "MySQL"
             }
 
-        # -------------------
-        # Top 3
-        # -------------------
+        # company lookup
 
-        if (
-            "top 3"
-            in q
-            and
-            "package"
-            in q
+        for company in (
+            df[
+                "company_name"
+            ]
         ):
 
-            top3 = (
-                df.sort_values(
-                    "Package",
-                    ascending=False
-                )
-                .head(3)
-            )
-
-            result = []
-
-            for _, row in (
-                top3.iterrows()
+            if (
+                company.lower()
+                in q
             ):
-
-                result.append(
-
-                    f"{row['Company']} "
-                    f"({row['Package']} LPA)"
-
-                )
-
-            return {
-
-                "answer":
-                ", ".join(
-                    result
-                ),
-
-                "context":
-                "Knowledge Base"
-            }
-
-        # -------------------
-        # Company-specific
-        # -------------------
-
-        if len(mentioned):
-
-            responses = []
-
-            for company in mentioned:
 
                 row = (
                     df[
                         df[
-                            "Company"
+                            "company_name"
                         ]
-                        == company
+                        ==
+                        company
                     ]
                     .iloc[0]
                 )
@@ -142,114 +197,51 @@ class ChatService:
                     in q
                 ):
 
-                    responses.append(
-                        f"{company}: "
-                        f"{row['Package']} LPA"
-                    )
+                    return {
 
-                elif (
-                    "cgpa"
-                    in q
-                ):
+                        "answer":
+                        f"{company} "
+                        f"offers "
+                        f"{row['package_lpa']} "
+                        f"LPA.",
 
-                    responses.append(
-                        f"{company}: "
-                        f"{row['CGPA']} CGPA"
-                    )
+                        "context":
+                        "MySQL"
+                    }
 
-                elif (
-                    "backlog"
-                    in q
-                ):
+                if (
 
-                    responses.append(
-                        f"{company}: "
-                        f"{row['Backlogs']} backlog(s)"
-                    )
-
-                elif (
-                    "focus"
-                    in q
-                    or
-                    "technology"
-                    in q
-                ):
-
-                    responses.append(
-                        f"{company}: "
-                        f"{row['Focus']}"
-                    )
-
-                elif (
                     "eligibility"
                     in q
+
                     or
-                    "criteria"
+
+                    "cgpa"
                     in q
+
                 ):
 
-                    responses.append(
+                    return {
 
-                        f"{company}: "
-                        f"CGPA "
-                        f"{row['CGPA']}, "
-                        f"Backlogs "
-                        f"{row['Backlogs']}"
+                        "answer":
+                        f"{company} "
+                        f"requires "
+                        f"{row['cgpa']} "
+                        f"CGPA and "
+                        f"allows "
+                        f"{row['backlogs']} "
+                        f"backlogs.",
 
-                    )
-
-            if responses:
-
-                return {
-
-                    "answer":
-                    " | ".join(
-                        responses
-                    ),
-
-                    "context":
-                    "Knowledge Base"
-                }
-
-        # -------------------
-        # fallback rag
-        # -------------------
-
-        retriever, llm = (
-            RAGPipeline.build()
-        )
-
-        docs = retriever.invoke(
-            question
-        )
-
-        context = "\n\n".join(
-            [
-                doc.page_content
-                for doc in docs
-            ]
-        )
-
-        prompt = (
-            PromptBuilder
-            .build_prompt(
-                context,
-                question
-            )
-        )
-
-        response = (
-            llm.invoke(
-                prompt
-            )
-        )
+                        "context":
+                        "MySQL"
+                    }
 
         return {
 
             "answer":
-            response,
+            "I don't have "
+            "enough information.",
 
             "context":
-            context
+            "MySQL"
         }
-
